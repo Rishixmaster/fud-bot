@@ -1,21 +1,16 @@
-import os
-import json
-import logging
-import subprocess
-import shutil
+import os, json, logging, subprocess, shutil
 from pathlib import Path
 from telegram import Update, Document
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Config from environment
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 KEYSTORE_PATH = os.getenv('KEYSTORE_PATH', '/app/signer.keystore')
 KEYSTORE_PASSWORD = os.getenv('KEYSTORE_PASSWORD')
 KEY_ALIAS = os.getenv('KEY_ALIAS', 'fudkey')
 CRYPTER_CMD = os.getenv('CRYPTER_CMD') or None
 ALLOWED_USERS = json.loads(os.getenv('ALLOWED_USERS', '[]'))
-WORK_DIR = os.getenv('WORK_DIR', '/app/work')
-TEMP_DIR = os.getenv('TEMP_DIR', '/app/temp')
+WORK_DIR = os.getenv('WORK_DIR', '/tmp/work')
+TEMP_DIR = os.getenv('TEMP_DIR', '/tmp/temp')
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN environment variable not set")
@@ -34,6 +29,7 @@ def is_allowed(uid):
     return not ALLOWED_USERS or uid in ALLOWED_USERS
 
 def sign_apk(inp, out):
+    # apksigner will be at /usr/local/bin/apksigner (Dockerfile puts it there)
     cmd = [
         "apksigner", "sign",
         "--ks", KEYSTORE_PATH,
@@ -105,7 +101,11 @@ async def handle_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except: pass
     if ok:
         with open(fout, "rb") as f:
-            await update.message.reply_document(document=f, filename=os.path.basename(fout), caption="FUD APK ready.")
+            await update.message.reply_document(
+                document=f,
+                filename=os.path.basename(fout),
+                caption="FUD APK ready."
+            )
         try: os.remove(fout)
         except: pass
     else:
