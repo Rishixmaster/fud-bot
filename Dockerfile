@@ -1,13 +1,11 @@
 FROM python:3.10-slim
 
-# Java install for apksigner
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        openjdk-17-jre-headless \
+        openjdk-21-jre-headless \
         wget unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Android SDK build-tools
 RUN wget -q https://dl.google.com/android/repository/build-tools_r34-linux.zip && \
     unzip -q build-tools_r34-linux.zip -d /tmp/sdk && \
     mkdir -p /usr/local/sdk/build-tools/34.0.0 && \
