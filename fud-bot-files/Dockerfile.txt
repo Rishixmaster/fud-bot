@@ -9,6 +9,7 @@ RUN apt-get update && \
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
+# Android build-tools
 RUN wget -q https://dl.google.com/android/repository/build-tools_r34-linux.zip && \
     unzip -q build-tools_r34-linux.zip -d /tmp/sdk && \
     mkdir -p /usr/local/sdk/build-tools/34.0.0 && \
@@ -24,4 +25,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY bot.py .
 COPY signer.keystore /app/signer.keystore
 
+# Railway free tier port not needed, ignore
 CMD ["python", "bot.py"]
